@@ -16,11 +16,11 @@ import org.apache.samza.task.StreamTaskFactory;
 public class DriverMatchTaskApplication implements TaskApplication {
     // Consider modify this zookeeper address, localhost may not be a good choice.
     // If this task application is executing in slave machine.
-    private static final List<String> KAFKA_CONSUMER_ZK_CONNECT = ImmutableList.of("localhost:2181");
+    private static final List<String> KAFKA_CONSUMER_ZK_CONNECT = ImmutableList.of("172.31.4.37.ec2.internal:9092");
 
     // Consider modify the bootstrap servers address. This example only cover one
     // address.
-    private static final List<String> KAFKA_PRODUCER_BOOTSTRAP_SERVERS = ImmutableList.of("localhost:9092");
+    private static final List<String> KAFKA_PRODUCER_BOOTSTRAP_SERVERS = ImmutableList.of("172.31.4.37.ec2.internal:9092","172.31.2.162.ec2.internal:9092","172.31.4.177.ec2.internal:9092");
     private static final Map<String, String> KAFKA_DEFAULT_STREAM_CONFIGS = ImmutableMap.of("replication.factor", "1");
 
     @Override
@@ -38,10 +38,28 @@ public class DriverMatchTaskApplication implements TaskApplication {
         // Define your input and output descriptor in here.
         // Reference solution:
         // https://github.com/apache/samza-hello-samza/blob/master/src/main/java/samza/examples/wikipedia/task/application/WikipediaStatsTaskApplication.java
+        KafkaInputDescriptor<JsonSerde> eventsDescriptor = kafkaSystemDescriptor.getInputDescriptor(
+            "events",
+            new JsonSerde<>());
+
+        KafkaInputDescriptor<JsonSerde> driverLocationsDescriptor = kafkaSystemDescriptor.getInputDescriptor(
+            "driver-locations",
+            new JsonSerde<>());
+
+        KafkaOutputDescriptor<JsonSerde> matchStreamDescriptor = kafkaSystemDescriptor.getOutputDescriptor(
+            "match-stream",
+            new JsonSerde<>());
 
         // Bound you descriptor with your taskApplicationDescriptor in here.
         // Please refer to the same link.
 
-        taskApplicationDescriptor.withTaskFactory((StreamTaskFactory)() -> new DriverMatchTask());
+        //taskApplicationDescriptor.withTaskFactory((StreamTaskFactory)() -> new DriverMatchTask());
+
+        taskApplicationDescriptor
+        .withInputStream(eventsDescriptor)
+        .withInputStream(driverLocationsDescriptor)
+        .withOutputStream(matchStreamDescriptor)
+        .withTaskFactory((StreamTaskFactory) () -> new DriverMatchTask());
+
     }
 }
