@@ -72,7 +72,22 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     }
 
     private void handleDriverLocationUpdates(Map<String, Object> message, String messageType) {
-        // Logic for handling driver location updates <<<<<<<!!!!!!!!!!!!!!
+        String driverId = message.get("driverId").toString();
+        Integer blockId = (Integer) message.get("blockId");
+
+        if ("ENTERING_BLOCK".equals(messageType)) {
+            // Driver is entering a block, so update their location in the store.
+            try {
+                String driverLocationJson = objectMapper.writeValueAsString(message);
+                driverLocationStore.put(driverId, driverLocationJson);
+            } catch (JsonProcessingException e) {
+                // Handle serialization error
+                throw new RuntimeException("Error serializing driver location data", e);
+            }
+        } else if ("LEAVING_BLOCK".equals(messageType)) {
+            // Driver is leaving a block, so remove their location from the store.
+            driverLocationStore.delete(driverId);
+        }
     }
 
     private void handleRideRequest(Map<String, Object> message, MessageCollector collector) {
