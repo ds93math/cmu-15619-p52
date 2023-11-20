@@ -107,8 +107,8 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         // Get driver details from the driverData map
         double distanceScore = calculateDistanceScore(driverData, clientLatitude, clientLongitude);
         double genderScore = calculateGenderScore(driverData, genderPreference);
-        double ratingScore = calculateRatingScore((Double) driverData.get("rating"));
-        double salaryScore = calculateSalaryScore((Double) driverData.get("salary"));
+        double ratingScore = calculateRatingScore((Number) driverData.get("rating")).doubleValue();
+        double salaryScore = calculateSalaryScore((Number) driverData.get("salary")).doubleValue();
 
         double matchScore = distanceScore * 0.4 + genderScore * 0.1 + ratingScore * 0.3 + salaryScore * 0.2;
 
