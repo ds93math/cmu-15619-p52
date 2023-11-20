@@ -217,6 +217,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
                 }
             } catch (IOException e) {
                 // Handle exception - possibly log this or throw a runtime exception
+                throw new RuntimeException("Error getting all drivers on this BlockID", e);
             }
         }
         allDrivers.close(); // Important to close the iterator to avoid resource leaks
