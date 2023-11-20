@@ -195,8 +195,28 @@ public class DriverMatchTask implements StreamTask, InitableTask {
 
     //<<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!
     // Assume a Driver class is defined elsewhere with appropriate fields and methods
-    private List<Driver> getAllDriversInBlock(Integer blockId) {
-        // Implement logic to retrieve all drivers in the block from the driverLocationStore
+    private List<Map<String, Object>> getAllDriversInBlock(Integer blockId) {
+        List<Map<String, Object>> driversInBlock = new ArrayList<>();
+    
+        // Iterate over all entries in the driverLocationStore
+        KeyValueIterator<String, String> allDrivers = driverLocationStore.all();
+        while (allDrivers.hasNext()) {
+            Entry<String, String> entry = allDrivers.next();
+            String driverJson = entry.getValue();
+            try {
+                // Parse the JSON string to a Map
+                Map<String, Object> driverData = objectMapper.readValue(driverJson, new TypeReference<Map<String, Object>>() {});
+                // Check if the driver is in the specified block
+                if (blockId.equals(driverData.get("blockId"))) {
+                    driversInBlock.add(driverData);
+                }
+            } catch (IOException e) {
+                // Handle exception - possibly log this or throw a runtime exception
+            }
+        }
+        allDrivers.close(); // Important to close the iterator to avoid resource leaks
+    
+        return driversInBlock;
     }
 
 
