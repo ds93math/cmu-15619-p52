@@ -2,6 +2,7 @@ package com.cloudcomputing.samza.nycabs;
 
 import org.apache.samza.context.Context;
 import org.apache.samza.storage.kv.KeyValueStore;
+import org.apache.samza.storage.kv.KeyValueIterator;
 import org.apache.samza.system.IncomingMessageEnvelope;
 import org.apache.samza.system.OutgoingMessageEnvelope;
 import org.apache.samza.system.SystemStream;
@@ -229,7 +230,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         matchMap.put("clientId", clientId);
         matchMap.put("driverId", driverId);
 
-        String matchJson = jsonUtil.toJson(matchMap);
+        String matchJson = objectMapper.writeValueAsString(matchMap);
         collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), matchJson));
     }
 
