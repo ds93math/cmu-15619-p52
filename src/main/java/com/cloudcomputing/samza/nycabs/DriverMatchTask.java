@@ -35,6 +35,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     public void init(Context context) throws Exception {
         this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-location-store");
         this.clientRequestStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("client-request-store");
+        this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-loc");
         this.jsonUtil = new JSONUtil();
     }
 
@@ -47,7 +48,37 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         approach that MapReduce sends all the key value pairs with the same key
         into the same reducer.
         */
-        String incomingStream = envelope.getSystemStreamPartition().getStream();
+        Map<String, Object> message = (Map<String, Object>) envelope.getMessage();
+        String messageType = (String) message.get("type");
+
+        if ("ENTERING_BLOCK".equals(messageType)) {
+            // Handle driver entering block
+            // Update driver location and state in the driverLocationStore
+        } else if ("LEAVING_BLOCK".equals(messageType)) {
+            // Handle driver leaving block
+            // Remove or update driver state in the driverLocationStore
+        } else if ("RIDE_REQUEST".equals(messageType)) {
+            // Handle ride request
+            // Find the best matching driver based on the provided match score formula
+            // Use helper methods to calculate each score component
+
+            // Example of calculating match score (you will need actual driver details and client preferences)
+            double distanceScore = calculateDistanceScore(driverLatitude, driverLongitude, clientLatitude, clientLongitude);
+            double genderScore = calculateGenderScore(driverGender, clientGenderPreference);
+            double ratingScore = calculateRatingScore(driverRating);
+            double salaryScore = calculateSalaryScore(driverSalary);
+
+            double matchScore = distanceScore * 0.4 + genderScore * 0.1 + ratingScore * 0.3 + salaryScore * 0.2;
+
+            // Send match to output stream if a suitable driver is found
+            Map<String, Object> match = new HashMap<>();
+            match.put("clientId", clientId);
+            match.put("driverId", bestMatchingDriverId);
+
+            collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), match));
+        }
+
+        /*String incomingStream = envelope.getSystemStreamPartition().getStream();
 
         if (incomingStream.equals(DriverMatchConfig.DRIVER_LOC_STREAM.getStream())) {
 	    // Handle Driver Location messages
@@ -67,7 +98,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
             }
         } else {
             throw new IllegalStateException("Unexpected input stream: " + envelope.getSystemStreamPartition());
-        }
+        }*/
     }
 
     private void sendMatchToOutputStream(MessageCollector collector, Integer clientId, Integer driverId) {
