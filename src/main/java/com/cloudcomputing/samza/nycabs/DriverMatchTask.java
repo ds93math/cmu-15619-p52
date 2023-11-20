@@ -34,19 +34,14 @@ public class DriverMatchTask implements StreamTask, InitableTask {
        READ Samza API part in Writeup to understand how to start
     */
     private KeyValueStore<String, String> driverLocationStore;
-    //private KeyValueStore<String, String> clientRequestStore;
     private ObjectMapper objectMapper;
     private double MAX_MONEY = 100.0;
 
-    //private JSONUtil jsonUtil;
 
     @Override
     @SuppressWarnings("unchecked")
     public void init(Context context) throws Exception {
-    //    this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-location-store");
-    //    this.clientRequestStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("client-request-store");
         this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-loc");
-//        this.jsonUtil = new JSONUtil();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -122,7 +117,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         // Construct the match JSON object to send to the match stream
         Map<String, Object> match = new HashMap<>();
         match.put("clientId", clientId);
-        match.put("driverId", bestMatch.get("driverId")); // Assuming driverId is part of the driverData map
+        match.put("driverId", bestMatch.get("driverId"));
         String matchJson = toJson(match);
         
         // Send the match to the match-stream
@@ -166,7 +161,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     }
     
     /*
-    // Example of calculating match score (you will need actual driver details and client preferences)
+    // calculating match score (you will need actual driver details and client preferences)
             double distanceScore = calculateDistanceScore(driverLatitude, driverLongitude, clientLatitude, clientLongitude);
             double genderScore = calculateGenderScore(driverGender, clientGenderPreference);
             double ratingScore = calculateRatingScore(driverRating);
@@ -209,12 +204,10 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         try {
             return objectMapper.writeValueAsString(data);
         } catch (IOException e) {
-            // Handle exception - you may want to log this and/or re-throw
             throw new RuntimeException("Error serializing data to JSON", e);
         }
     }
 
-    //<<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!
     // Assume a Driver class is defined elsewhere with appropriate fields and methods
     private List<Map<String, Object>> getAllDriversInBlock(Integer blockId) {
         List<Map<String, Object>> driversInBlock = new ArrayList<>();
@@ -222,7 +215,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         // Iterate over all entries in the driverLocationStore
         KeyValueIterator<String, String> allDrivers = driverLocationStore.all();
         while (allDrivers.hasNext()) {
-            org.apache.samza.storage.kv.Entry<String, String> entry = allDrivers.next(); // Use the fully qualified name if necessary
+            org.apache.samza.storage.kv.Entry<String, String> entry = allDrivers.next(); 
             String driverJson = entry.getValue();
             try {
                 // Parse the JSON string to a Map
@@ -232,7 +225,6 @@ public class DriverMatchTask implements StreamTask, InitableTask {
                     driversInBlock.add(driverData);
                 }
             } catch (IOException e) {
-                // Handle exception - possibly log this or throw a runtime exception
                 throw new RuntimeException("Error getting all drivers on this BlockID", e);
             }
         }
@@ -250,7 +242,6 @@ public class DriverMatchTask implements StreamTask, InitableTask {
             String matchJson = objectMapper.writeValueAsString(matchMap);
             collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), matchJson));
         } catch (JsonProcessingException e) {
-            // Handle the exception here. For example, you could log it and/or wrap it in a RuntimeException.
             throw new RuntimeException("Error serializing match data to JSON", e);
         }
     }
