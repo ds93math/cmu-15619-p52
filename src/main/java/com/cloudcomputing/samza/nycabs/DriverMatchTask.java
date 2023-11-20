@@ -206,7 +206,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         // Iterate over all entries in the driverLocationStore
         KeyValueIterator<String, String> allDrivers = driverLocationStore.all();
         while (allDrivers.hasNext()) {
-            Entry<String, String> entry = allDrivers.next();
+            org.apache.samza.storage.kv.Entry<String, String> entry = allDrivers.next(); // Use the fully qualified name if necessary
             String driverJson = entry.getValue();
             try {
                 // Parse the JSON string to a Map
