@@ -221,18 +221,22 @@ public class DriverMatchTask implements StreamTask, InitableTask {
             }
         }
         allDrivers.close(); // Important to close the iterator to avoid resource leaks
-    
         return driversInBlock;
     }
 
 
     private void sendMatchToOutputStream(MessageCollector collector, Integer clientId, Integer driverId) {
-        Map<String, Object> matchMap = new HashMap<>();
-        matchMap.put("clientId", clientId);
-        matchMap.put("driverId", driverId);
+        try {
+            Map<String, Object> matchMap = new HashMap<>();
+            matchMap.put("clientId", clientId);
+            matchMap.put("driverId", driverId);
 
-        String matchJson = objectMapper.writeValueAsString(matchMap);
-        collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), matchJson));
+            String matchJson = objectMapper.writeValueAsString(matchMap);
+            collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), matchJson));
+        } catch (JsonProcessingException e) {
+            // Handle the exception here. For example, you could log it and/or wrap it in a RuntimeException.
+            throw new RuntimeException("Error serializing match data to JSON", e);
+        }
     }
 
 }
