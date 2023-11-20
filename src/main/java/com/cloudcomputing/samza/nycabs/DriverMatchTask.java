@@ -42,7 +42,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         this.clientRequestStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("client-request-store");
         this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-loc");
         this.jsonUtil = new JSONUtil();
-        this.objectMapper = new ObjectMapper()
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
