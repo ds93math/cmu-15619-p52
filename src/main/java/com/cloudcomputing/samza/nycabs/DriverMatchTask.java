@@ -34,7 +34,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
        READ Samza API part in Writeup to understand how to start
     */
     private KeyValueStore<String, String> driverLocationStore;
-    private KeyValueStore<String, String> clientRequestStore;
+    //private KeyValueStore<String, String> clientRequestStore;
     private ObjectMapper objectMapper;
     private double MAX_MONEY = 100.0;
 
@@ -43,8 +43,8 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     @Override
     @SuppressWarnings("unchecked")
     public void init(Context context) throws Exception {
-        this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-location-store");
-        this.clientRequestStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("client-request-store");
+    //    this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-location-store");
+    //    this.clientRequestStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("client-request-store");
         this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-loc");
 //        this.jsonUtil = new JSONUtil();
         this.objectMapper = new ObjectMapper();
