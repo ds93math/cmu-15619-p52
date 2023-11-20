@@ -33,7 +33,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     private ObjectMapper objectMapper;
     private double MAX_MONEY = 100.0;
 
-    private JSONUtil jsonUtil;
+    //private JSONUtil jsonUtil;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -41,7 +41,7 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-location-store");
         this.clientRequestStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("client-request-store");
         this.driverLocationStore = (KeyValueStore<String, String>) context.getTaskContext().getStore("driver-loc");
-        this.jsonUtil = new JSONUtil();
+//        this.jsonUtil = new JSONUtil();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -112,10 +112,9 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     }
 
     // Helper methods for calculating scores  <<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!
-    private double calculateDistanceScore(Driver driver, double clientLatitude, double clientLongitude) {
-        // Calculate the distance score based on driver and client coordinates
-        double driverLatitude = driver.getLatitude();
-        double driverLongitude = driver.getLongitude();
+    private double calculateDistanceScore(Map<String, Object> driverData, double clientLatitude, double clientLongitude) {
+        double driverLatitude = (Double) driverData.get("latitude");
+        double driverLongitude = (Double) driverData.get("longitude");
 
         // Calculate the Euclidean distance
         double distance = Math.sqrt(Math.pow(driverLatitude - clientLatitude, 2) + Math.pow(driverLongitude - clientLongitude, 2));
