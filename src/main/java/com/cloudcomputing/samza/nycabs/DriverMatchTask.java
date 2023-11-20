@@ -114,11 +114,30 @@ public class DriverMatchTask implements StreamTask, InitableTask {
     // Helper methods for calculating scores  <<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!
     private double calculateDistanceScore(Driver driver, double clientLatitude, double clientLongitude) {
         // Calculate the distance score based on driver and client coordinates
+        double driverLatitude = driver.getLatitude();
+        double driverLongitude = driver.getLongitude();
+
+        // Calculate the Euclidean distance
+        double distance = Math.sqrt(Math.pow(driverLatitude - clientLatitude, 2) + Math.pow(driverLongitude - clientLongitude, 2));
+
+        // Calculate the score using the distance
+        double distanceScore = Math.exp(-1 * distance);
+
+        return distanceScore;
     }
 
     //<<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!<<<<<<<!!!!!!!!!!!!!!
     private double calculateGenderScore(Driver driver, String genderPreference) {
-        // Calculate the gender score based on driver gender and client preference
+       // Calculate the gender score based on driver gender and client preference
+       String driverGender = driver.getGender(); // Assume Driver class has a getGender() method.
+
+       // If the client has no preference, return 1.0
+       if ("N".equals(genderPreference)) {
+            return 1.0;
+       }
+       
+       // If the driver's gender matches the client's preference, return 1.0, otherwise return 0.0
+       return driverGender.equals(genderPreference) ? 1.0 : 0.0;
     }
 
     private double calculateRatingScore(double driverRating) {
