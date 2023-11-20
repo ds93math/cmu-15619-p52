@@ -79,37 +79,37 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         Integer blockId = (Integer) message.get("blockId");
 
         // Retrieve all available drivers in the same block
-        // Assuming `getAllDriversInBlock` is a method to retrieve drivers
-        List<Driver> driversInBlock = getAllDriversInBlock(blockId);
-        Driver bestMatch = null;
-        double highestMatchScore = -1;
+    List<Map<String, Object>> driversInBlock = getAllDriversInBlock(blockId);
+    Map<String, Object> bestMatch = null;
+    double highestMatchScore = -1;
 
-        for (Driver driver : driversInBlock) {
-            // Get driver details from the store or the message
-            double distanceScore = calculateDistanceScore(driver, clientLatitude, clientLongitude);
-            double genderScore = calculateGenderScore(driver, genderPreference);
-            double ratingScore = calculateRatingScore(driver.getRating());
-            double salaryScore = calculateSalaryScore(driver.getSalary());
+    for (Map<String, Object> driverData : driversInBlock) {
+        // Get driver details from the driverData map
+        double distanceScore = calculateDistanceScore(driverData, clientLatitude, clientLongitude);
+        double genderScore = calculateGenderScore(driverData, genderPreference);
+        double ratingScore = calculateRatingScore((Double) driverData.get("rating"));
+        double salaryScore = calculateSalaryScore((Double) driverData.get("salary"));
 
-            double matchScore = distanceScore * 0.4 + genderScore * 0.1 + ratingScore * 0.3 + salaryScore * 0.2;
+        double matchScore = distanceScore * 0.4 + genderScore * 0.1 + ratingScore * 0.3 + salaryScore * 0.2;
 
-            if (matchScore > highestMatchScore) {
-                highestMatchScore = matchScore;
-                bestMatch = driver;
-            }
-        }
-
-        if (bestMatch != null) {
-            // Construct the match JSON object to send to the match stream
-            Map<String, Integer> match = new HashMap<>();
-            match.put("clientId", clientId);
-            match.put("driverId", bestMatch.getDriverId());
-            String matchJson = toJson(match);
-            
-            // Send the match to the match-stream
-            collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), matchJson));
+        if (matchScore > highestMatchScore) {
+            highestMatchScore = matchScore;
+            bestMatch = driverData;
         }
     }
+
+    if (bestMatch != null) {
+        // Construct the match JSON object to send to the match stream
+        Map<String, Object> match = new HashMap<>();
+        match.put("clientId", clientId);
+        match.put("driverId", bestMatch.get("driverId")); // Assuming driverId is part of the driverData map
+        String matchJson = toJson(match);
+        
+        // Send the match to the match-stream
+        collector.send(new OutgoingMessageEnvelope(new SystemStream("kafka", "match-stream"), matchJson));
+    }
+}
+
 
     // Helper methods for calculating scores 
     private double calculateDistanceScore(Map<String, Object> driverData, double clientLatitude, double clientLongitude) {
@@ -185,10 +185,11 @@ public class DriverMatchTask implements StreamTask, InitableTask {
         }
     } 
     */
-    private String toJson(Map<String, Integer> data) {
+    private String toJson(Map<String, Object> data) {
         try {
             return objectMapper.writeValueAsString(data);
         } catch (IOException e) {
+            // Handle exception - you may want to log this and/or re-throw
             throw new RuntimeException("Error serializing data to JSON", e);
         }
     }
