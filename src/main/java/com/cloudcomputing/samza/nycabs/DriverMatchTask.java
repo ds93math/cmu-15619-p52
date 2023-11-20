@@ -9,10 +9,13 @@ import org.apache.samza.task.InitableTask;
 import org.apache.samza.task.MessageCollector;
 import org.apache.samza.task.StreamTask;
 import org.apache.samza.task.TaskCoordinator;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map.Entry;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
